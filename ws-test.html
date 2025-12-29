@@ -1,0 +1,344 @@
+<!--Made by BlazeInferno64 (https://github.com/blazeinferno64)-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Realtime WebSocket Tester directly using your browser!</title>
+    <script defer src="https://kit.fontawesome.com/f3220d5256.js" crossorigin="anonymous"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --ff: "Montserrat", sans-serif;
+
+            --accent: #00f5a0;
+            --accent-blue: #6f9cea;
+            --bg-dark: #1e1e1e;
+            --bg-soft: #2a2d2e;
+            --border-soft: #2affb1;
+        }
+
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            font-family: var(--ff);
+            background: linear-gradient(135deg, #00f5a0, #00d9ff);
+        }
+
+        .app {
+            width: 360px;
+            background: rgba(30, 30, 30, 0.85);
+            backdrop-filter: blur(14px);
+            border-radius: .3rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            color: #fff;
+            overflow: hidden;
+            transition: all .1s ease-in-out;
+            animation: pop 1s ease-in-out;
+        }
+
+        .app-head {
+            user-select: none;
+            background: linear-gradient(135deg, #2a2d2e, #202223);
+            padding: 1rem;
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .app-head p {
+            color: var(--accent-blue);
+        }
+
+        .app-main {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        label {
+            font-size: 0.9rem;
+            color: #cfcfcf;
+            margin-bottom: 0.25rem;
+        }
+
+        .url-input,
+        .msg-input,
+        .interaction-input {
+            display: flex;
+            flex-direction: column;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-soft);
+            background: #f2f2f2;
+            font-family: var(--ff);
+            font-size: 0.95rem;
+            transition: border 0.15s ease, box-shadow 0.15s ease, background .15s ease;
+        }
+
+        textarea {
+            resize: none;
+            height: 120px;
+        }
+
+        input:hover,
+        textarea:hover {
+            background: #dedede;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 2px rgba(111, 156, 234, 0.3);
+        }
+
+        button {
+            outline: none;
+            padding: 0.6rem;
+            border-radius: 8px;
+            border: none;
+            user-select: none;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+
+        button:active {
+            transform: scale(0.97);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+
+
+        .connect {
+            background: var(--accent);
+            color: #003b26;
+        }
+
+        .send {
+            background: var(--accent-blue);
+            color: #081c3a;
+        }
+
+        .connect:hover,
+        .send:hover {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .cn {
+            font-size: 0.85rem;
+            padding: 0.5rem;
+            border-radius: 6px;
+            background: #181818;
+            border: 1px dashed var(--border-soft);
+            overflow-x: auto;
+        }
+
+        .interaction-input label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .copy {
+            background: transparent;
+            border: 1px solid var(--border-soft);
+            border-radius: .3rem;
+            padding: 0.35rem 0.5rem;
+            cursor: pointer;
+            color: #bbb;
+            transition: background 0.1s ease, color 0.1s ease;
+        }
+
+        .copy:hover {
+            background: var(--border-soft);
+            color: #111;
+        }
+
+        .interaction {
+            background: #111;
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            height: 170px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            border: 1px solid var(--border-soft);
+        }
+
+        /* Scrollbar */
+        .interaction::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .interaction::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 6px;
+        }
+        @keyframes pop {
+            from {
+                scale: 0;
+                opacity: 0;
+            }
+            to {
+                scale: 1;
+                opacity: 1;
+            }
+        }
+        @media (max-width: 360px) {
+            .app {
+                width: 93%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <div class="app-head">
+            <p>
+                Realtime web socket tester
+            </p>
+        </div>
+        <div class="app-main">
+            <div class="url-input">
+                <label for="url">
+                    Websocket URL:
+                </label>
+                <input type="url" name="websocket-url" id="url" placeholder="Enter websocket url...." />
+            </div>
+            <button class="connect">
+                Connect
+            </button>
+            <div class="msg-input">
+                <label for="msg">
+                    Test message:
+                </label>
+                <textarea name="websocket-message" id="msg" placeholder="Enter a mesage for testing...."></textarea>
+            </div>
+            <button class="send">
+                Send message
+            </button>
+            <p class="cn">
+                Connected to: null
+            </p>
+            <div class="interaction-input">
+                <label for="interaction">
+                    <p>Websocket console:</p>
+                    <p class="copy"><i class="fa fa-clone"></i></p>
+                </label>
+                <div class="interaction">Not connected to any server!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const interactionRes = document.querySelector(".interaction");
+        const messageInput = document.querySelector("#msg");
+        const urlInput = document.querySelector("#url");
+        const connectBtn = document.querySelector(".connect");
+        const sendBtn = document.querySelector(".send");
+        const copyBtn = document.querySelector(".copy");
+        const connectionInfo = document.querySelector(".cn");
+
+        urlInput.addEventListener("keydown", (e) => {
+            if (e.keyCode === 13) return connectBtn.click();
+        })
+
+        let socket = null;
+
+        sendBtn.disabled = true;
+
+        function log(message) {
+            interactionRes.textContent += `\n${message}`;
+            interactionRes.scrollTop = interactionRes.scrollHeight;
+        }
+
+        connectBtn.addEventListener("click", (e) => {
+            const url = urlInput.value.trim();
+
+            if (!url) {
+                alert("Please enter a WebSocket URL");
+                return;
+            }
+
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                log(`Already connected to '${socket.url}'!`);
+                return;
+            }
+
+            interactionRes.textContent = "Connecting...";
+            connectionInfo.textContent = `Connecting to: ${url}...`;
+
+            try {
+                socket = new WebSocket(url);
+
+                socket.addEventListener("open", (e) => {
+                    sendBtn.disabled = false;
+                    log(`Connected successfully!`);
+                    connectionInfo.textContent = `Connected to: ${url}`;
+                });
+
+                socket.addEventListener("message", (event) => {
+                    log(`Server: ${event.data}`);
+                });
+
+                socket.addEventListener("close", (e) => {
+                    sendBtn.disabled = true;
+                    log(`Connected terminated!`);
+                    connectionInfo.textContent = "Connected to: null";
+                })
+            } catch (error) {
+                interactionRes.textContent = `${error}`;
+                connectionInfo.textContent = `Connected to: null`;
+            }
+        });
+
+        sendBtn.addEventListener("click", () => {
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                alert("WebSocket is not connected");
+                return;
+            }
+
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            socket.send(message);
+            log(`You: ${message}`);
+            messageInput.value = "";
+        });
+
+        copyBtn.addEventListener("click", () => {
+            navigator.clipboard.writeText(interactionRes.textContent);
+            alert("Copied console text!");
+        });
+    </script>
+</body>
+
+</html>
